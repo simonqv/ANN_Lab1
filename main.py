@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as pl
+import matplotlib.pyplot as plt
 
 
 def generate_data():
@@ -20,10 +20,10 @@ def generate_data():
     y_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[1])).tolist()
 
     classB = [x_B, y_B]
-    pl.scatter(classA[0], classA[1], c="r", label="class A")
-    pl.scatter(classB[0], classB[1], c="b", label="class B")
-    pl.legend()
-
+    plt.scatter(classA[0], classA[1], label="Class A")
+    plt.scatter(classB[0], classB[1], label="Class B")
+    plt.legend()
+    plt.show()
 
 
 generate_data()
