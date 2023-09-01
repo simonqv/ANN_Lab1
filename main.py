@@ -49,9 +49,27 @@ def f_step(X_input, weigths):
     # If on the edge, count as zero
     return 0
 
-def perceptron_learning(x_coord, y_coord, target):
+def perceptron_learning(X_input, target, weights, eta):
+    for i in range(200):
+        X_in = [X_input[0][i%200], X_input[1][i%200], X_input[2][i%200]]
+        f = f_step(X_in, weights)
+        delta_w = [(eta * (target[i%200] - f)) * X_in[n] for n in range(3)]
+        weights = [weights[n] + delta_w[n] for n in range(3)]
+    return weights
+
+def delta_learning(X_input, target, weights, eta):
+    len(target)
+    for i in range(200):
+        X_in = [X_input[0][i%200], X_input[1][i%200], X_input[2][i%200]]
+        wx = weights[0] * X_in[0] + weights[1] * X_in[1] + weights[2] * X_in[2]
+        delta_w = [(eta * (target[i%200] - wx)) * X_in[n] for n in range(3)]
+        weights = [weights[n] + delta_w[n] for n in range(3)]
+
+    return weights
+
+def learning(x_coord, y_coord, target, delta=True):
     # start weights
-    weights = [0.5, 0.5, -1]
+    weights = [0.5, 0.5, -1] # try with radom start also 
     bias = np.ones(200).tolist()
     X_input = [x_coord, y_coord, bias]
     eta = 0.01
@@ -59,28 +77,29 @@ def perceptron_learning(x_coord, y_coord, target):
     print(weights)
     x_axis = np.linspace(-4, 4, 100)
     y_old =  x_axis * ((-weights[1]) / weights[0]) + weights[2]
-    for i in range(20000):
-        X_in = [X_input[0][i%200], X_input[1][i%200], X_input[2][i%200]]
-        f = f_step(X_in, weights)
-        new_w = [(eta * (target[i%200] - f)) * X_in[n] for n in range(3)]
-        weights = [weights[n] + new_w[n] for n in range(3)]
+
+    if(delta):
+        weights = delta_learning(X_input, target, weights, eta)
+    else:
+        weights =  perceptron_learning(X_input, target, weights, eta)
+   
     print(weights)
 
     # make orthogonal: orthogonal_vector = [-original_vector[1], original_vector[0]]
     # line = [(0,0), (-weights[1], weights[0])]
     y_print = x_axis * ((-weights[1]) / weights[0]) + weights[2]
-    plt.plot(x_axis, y_print, c="r")
-    plt.plot(x_axis, y_old, c="b")
-    plt.show()
-
-def delta_learning(x_coord, y_coord, target):
-    # targets[A,B]
-    targets = [np.ones(100), (np.ones(100) * -1)]
-    eta = 0.01
-    e = 1
-    x = 1
-    weights = eta * e * x
+    if(delta):
+        plt.plot(x_axis, y_print, label="delta", c="b")
+    else:
+        plt.plot(x_axis, y_print, label="perceptron", c="orange")
+    
 
 
 x, y, target_p, target_d = generate_data()
-perceptron_learning(x, y, target_p)
+#perc learning
+learning(x, y, target_p, False)
+#delta learning
+learning(x, y, target_d, True)
+plt.legend()
+plt.show()
+
