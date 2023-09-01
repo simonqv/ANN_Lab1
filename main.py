@@ -59,6 +59,7 @@ def perceptron_learning(X_input, target, weights, eta):
         f = f_step(X_in, weights)
         delta_w = [(eta * (target[i % 200] - f)) * X_in[n] for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
+
     return weights
 
 
@@ -76,8 +77,8 @@ def delta_learning(X_input, target, weights, eta):
 # delta learning in batches
 def batch_learning(X_input, target, weights, eta):
     X_input_np = np.array(X_input)
-    target_np = np.array(target).reshape(1,-1)
-    weights_np = np.array(weights).reshape(1,-1)
+    target_np = np.array(target).reshape(1, -1)
+    weights_np = np.array(weights).reshape(1, -1)
     X_transposed = np.transpose(X_input_np)
 
     for i in range(EPOCH):
@@ -89,16 +90,32 @@ def batch_learning(X_input, target, weights, eta):
     return weights_np[0].tolist()
 
 
-def learning(x_coord, y_coord, target, delta=True, batch=False):
+def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
+    """
+    Prepares and runs the learning algorithms
+    x_coord:    the x-coordinates of the input data
+    y_coord:    the y-coordinates of the input data
+    target:     {0,1} for perceptron learning and [-1,1] for delta learning
+    delta:      True if delta learning, False if perceptron learning
+    batch:      True if batch learning, False otherwise
+    bias:       True if bias is used, False otherwise
+    """
+
     # start weights
-    weights = [0.5, 0.5, -1]  # try with random start also
-    bias = np.ones(200).tolist()
-    X_input = [x_coord, y_coord, bias]
+    if bias:
+        weights = [0.5, 0.5, -1]  # try with random start also
+        bias = np.ones(200).tolist()
+        X_input = [x_coord, y_coord, bias]
+
+    else:
+        weights = [0.5, 0.5]  # try with random start also
+        X_input = [x_coord, y_coord]
+
     eta = 0.0001
     # e = t * fstep(weight tarnspo*X)
     print(weights)
     x_axis = np.linspace(-4, 4, 100)
-    y_old = x_axis * ((-weights[1]) / weights[0]) + weights[2]
+    # y_old = x_axis * ((-weights[1]) / weights[0]) + weights[2]
     if not batch:
         if delta:
             weights = delta_learning(X_input, target, weights, eta)
@@ -110,26 +127,38 @@ def learning(x_coord, y_coord, target, delta=True, batch=False):
 
     # make orthogonal: orthogonal_vector = [-original_vector[1], original_vector[0]]
     # line = [(0,0), (-weights[1], weights[0])]
-    y_print = x_axis * ((-weights[1]) / weights[0]) + weights[2]
+    if bias:
+        y_print = x_axis * ((-weights[1]) / weights[0]) + weights[2]
+        plt.plot(0, weights[2], marker="o", c="pink")
+    else:
+        y_print = x_axis * ((-weights[1]) / weights[0])
+        plt.plot(0, 0, marker="o", c="r")
     if delta:
         if batch:
-            plt.plot(x_axis, y_print, label="delta batch", c="b")
+            if bias:
+                plt.plot(x_axis, y_print, label="delta batch", c="b")
+            else:
+                plt.plot(x_axis, y_print, label="delta batch without bias", c="g")
         else:
             plt.plot(x_axis, y_print, label="delta", c="r")
     else:
         plt.plot(x_axis, y_print, label="perceptron", c="orange")
 
 
+# Perceptron learning vs Delta learning
 def task1_1():
     x, y, target_p, target_d = generate_data()
-    # perc learning
+
+    # perceptron learning
     learning(x, y, target_p, False)
+
     # delta learning
     learning(x, y, target_d, True)
     plt.legend()
     plt.show()
 
 
+# Delta learning with batch vs online
 def task1_2():
     x, y, target_p, target_d = generate_data()
 
@@ -138,16 +167,28 @@ def task1_2():
 
     # delta learning batch
     learning(x, y, target_d, True, True)
+
     plt.legend()
     plt.show()
 
 
+# Delta batch learning with bias vs without bias
 def task1_3():
-    print("not done")
+    x, y, target_p, target_d = generate_data()
+
+    # Delta learning with batch with bias
+    learning(x, y, target_d, True, True, True)
+
+    # Delta learning with batch without bias
+    learning(x, y, target_d, True, True, False)
+
+    plt.legend()
+    plt.show()
 
 
+# Data not linearly separable
 def task2_1():
     print("not done")
 
 
-task1_2()
+task1_3()
