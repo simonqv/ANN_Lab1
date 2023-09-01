@@ -3,6 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
+EPOCH = 20
 
 # 3.1.1
 def generate_data():
@@ -66,10 +67,15 @@ def delta_learning(X_input, target, weights, eta):
         weights = [weights[n] + delta_w[n] for n in range(3)]
 
     return weights
+    # detla learning in batches
+def batch_learning(X_input, target, weights, eta):
+    for i in range(EPOCH):
+        
+    return weights
 
-def learning(x_coord, y_coord, target, delta=True):
+def learning(x_coord, y_coord, target, delta=True, batch=False):
     # start weights
-    weights = [0.5, 0.5, -1] # try with radom start also 
+    weights = [0.5, 0.5, -1] # try with random start also 
     bias = np.ones(200).tolist()
     X_input = [x_coord, y_coord, bias]
     eta = 0.01
@@ -77,12 +83,13 @@ def learning(x_coord, y_coord, target, delta=True):
     print(weights)
     x_axis = np.linspace(-4, 4, 100)
     y_old =  x_axis * ((-weights[1]) / weights[0]) + weights[2]
-
-    if(delta):
-        weights = delta_learning(X_input, target, weights, eta)
-    else:
-        weights =  perceptron_learning(X_input, target, weights, eta)
-   
+    if (not batch):
+        if(delta):
+            weights = delta_learning(X_input, target, weights, eta)
+        else:
+            weights =  perceptron_learning(X_input, target, weights, eta)
+    else: 
+            weights = batch_learning(X_input, target, weights, eta)
     print(weights)
 
     # make orthogonal: orthogonal_vector = [-original_vector[1], original_vector[0]]
@@ -95,11 +102,30 @@ def learning(x_coord, y_coord, target, delta=True):
     
 
 
-x, y, target_p, target_d = generate_data()
-#perc learning
-learning(x, y, target_p, False)
-#delta learning
-learning(x, y, target_d, True)
-plt.legend()
-plt.show()
+def task1_1():
+    x, y, target_p, target_d = generate_data()
+    #perc learning
+    learning(x, y, target_p, False)
+    #delta learning
+    learning(x, y, target_d, True)
+    plt.legend()
+    plt.show()
+
+def task1_2():
+    x, y, target_p, target_d = generate_data()
+
+    #delta learning online
+    learning(x, y, target_d, True, False)
+    
+    #delta learning batch
+    learning(x, y, target_d, True, True)
+    plt.legend()
+    plt.show()    
+
+def task1_3():
+    print("not done")
+
+
+def task2_1():
+    print("not done")
 
