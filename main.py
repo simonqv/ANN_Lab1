@@ -11,7 +11,7 @@ def generate_data():
     n = 100
     # mean point in distribution, X-axis and Y-axis means.
     # Class A
-    meanA = [1.0, 0.5]
+    meanA = [3.0, 3.0]
     sigmaA = 0.4
     x_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[0])).tolist()
     y_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[1])).tolist()
@@ -19,7 +19,7 @@ def generate_data():
     classA = [x_A, y_A]
 
     # Class B
-    meanB = [-2.0, -0.5]
+    meanB = [-2.0, -2.5]
     sigmaB = 0.4
     x_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[0])).tolist()
     y_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[1])).tolist()
@@ -47,14 +47,14 @@ def generate_data():
 
 # 3.1.2.1
 def f_step(X_input, weights):
-    y_prim = weights[0] * X_input[0] + weights[1] * X_input[1] + weights[2] * X_input[2]
-    if y_prim > 0: return 1
+    y_prim = weights[0] * X_input[0] + weights[1] * X_input[1] + (-weights[2]) * X_input[2]
+    if y_prim > (-weights[2]): return 1
     # If on the edge, count as zero
     return 0
 
 
 def perceptron_learning(X_input, target, weights, eta):
-    for i in range(200):
+    for i in range(200*2000):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], X_input[2][i % 200]]
         f = f_step(X_in, weights)
         delta_w = [(eta * (target[i % 200] - f)) * X_in[n] for n in range(3)]
@@ -65,10 +65,10 @@ def perceptron_learning(X_input, target, weights, eta):
 
 def delta_learning(X_input, target, weights, eta):
     len(target)
-    for i in range(20000):
+    for i in range(200*20):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], X_input[2][i % 200]]
         wx = weights[0] * X_in[0] + weights[1] * X_in[1] + weights[2] * X_in[2]
-        delta_w = [((eta) * (target[i % 200] - wx)) * X_in[n] for n in range(3)]
+        delta_w = [(-eta * (target[i % 200] - wx)) * X_in[n] for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
 
     return weights
@@ -84,7 +84,7 @@ def batch_learning(X_input, target, weights, eta):
     for i in range(EPOCH):
         # Delta_W = (WX - T)X'
         wx = np.dot(weights_np, X_input_np) - target_np
-        delta_W = -(eta * np.dot(wx, X_transposed))
+        delta_W = (eta * np.dot(wx, X_transposed))
         weights_np = weights_np + delta_W
 
     return weights_np[0].tolist()
@@ -102,20 +102,23 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
     """
 
     # start weights
+    x_r = random.uniform(-1,1)
+    y_r = random.uniform(-1,1)
+    theta = 0
     if bias:
-        weights = [0.5, 0.5, -1]  # try with random start also
+        weights = [x_r, y_r, -theta]  # try with random start also
         bias = np.ones(200).tolist()
         X_input = [x_coord, y_coord, bias]
 
     else:
-        weights = [0.5, 0.5]  # try with random start also
+        weights = [x_r, y_r]  # try with random start also
         X_input = [x_coord, y_coord]
 
     eta = 0.0001
     # e = t * fstep(weight tarnspo*X)
     print(weights)
     x_axis = np.linspace(-4, 4, 100)
-    # y_old = x_axis * ((-weights[1]) / weights[0]) + weights[2]
+    y_old = x_axis * ((-weights[1]) / weights[0]) + weights[2]
     if not batch:
         if delta:
             weights = delta_learning(X_input, target, weights, eta)
@@ -129,6 +132,7 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
     # line = [(0,0), (-weights[1], weights[0])]
     if bias:
         y_print = x_axis * ((-weights[1]) / weights[0]) + weights[2]
+        print("bias ", weights[2])
         plt.plot(0, weights[2], marker="o", c="pink")
     else:
         y_print = x_axis * ((-weights[1]) / weights[0])
@@ -143,7 +147,7 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
             plt.plot(x_axis, y_print, label="delta", c="r")
     else:
         plt.plot(x_axis, y_print, label="perceptron", c="orange")
-
+    plt.plot(x_axis, y_old, label="OLD")
 
 # Perceptron learning vs Delta learning
 def task1_1():
@@ -153,7 +157,7 @@ def task1_1():
     learning(x, y, target_p, False)
 
     # delta learning
-    learning(x, y, target_d, True)
+    #learning(x, y, target_d, True)
     plt.legend()
     plt.show()
 
@@ -191,4 +195,4 @@ def task2_1():
     print("not done")
 
 
-task1_3()
+task1_1()
