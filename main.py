@@ -57,7 +57,7 @@ def perceptron_learning(X_input, target, weights, eta):
     for i in range(200*2000):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], X_input[2][i % 200]]
         f = f_step(X_in, weights)
-        delta_w = [(eta * (target[i % 200] - f)) * X_in[n] for n in range(3)]
+        delta_w = [((-eta) * (target[i % 200] - f)) * X_in[n] for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
 
     return weights
@@ -196,3 +196,4 @@ def task2_1():
 
 
 task1_1()
+
