@@ -42,7 +42,13 @@ def generate_data():
     x_coord, y_coord, target_p, target_d = zip(*temp)
     x_coord, y_coord, target_p, target_d = list(x_coord), list(y_coord), list(target_p), list(target_d)
 
-    return x_coord, y_coord, target_p, target_d
+    # making initial weights
+    init_weight_x_r = random.uniform(-1, 1)
+    init_weight_y_r = random.uniform(-1, 1)
+    theta = 1
+    init_w = [init_weight_x_r, init_weight_y_r, theta]
+
+    return x_coord, y_coord, target_p, target_d, init_w
 
 
 # 3.1.2.1
@@ -64,10 +70,10 @@ def perceptron_learning(X_input, target, weights, eta):
 
 def delta_learning(X_input, target, weights, eta):
     len(target)
-    for i in range(200*20):
+    for i in range(200*800):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], X_input[2][i % 200]]
         wx = weights[0] * X_in[0] + weights[1] * X_in[1] + weights[2] * X_in[2]
-        delta_w = [(-eta * (target[i % 200] - wx)) * X_in[n] for n in range(3)]
+        delta_w = [eta * ((target[i % 200] - wx) * X_in[n]) for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
 
     return weights
@@ -89,7 +95,7 @@ def batch_learning(X_input, target, weights, eta):
     return weights_np[0].tolist()
 
 
-def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
+def learning(x_coord, y_coord, target, init_w, delta=True, batch=False, bias=True):
     """
     Prepares and runs the learning algorithms
     x_coord:    the x-coordinates of the input data
@@ -101,16 +107,14 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
     """
 
     # start weights
-    x_r = random.uniform(-1,1)
-    y_r = random.uniform(-1,1)
-    theta = 0
+    
     if bias:
-        weights = [x_r, y_r, -theta]  # try with random start also
+        weights = init_w  # try with random start also
         bias = np.ones(200).tolist()
         X_input = [x_coord, y_coord, bias]
 
     else:
-        weights = [x_r, y_r]  # try with random start also
+        weights = init_w[0:2]  # try with random start also
         X_input = [x_coord, y_coord]
 
     eta = 0.0001
@@ -150,26 +154,26 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
 
 # Perceptron learning vs Delta learning
 def task1_1():
-    x, y, target_p, target_d = generate_data()
+    x, y, target_p, target_d, init_w = generate_data()
 
     # perceptron learning
-    learning(x, y, target_p, False)
+    learning(x, y, target_p, init_w, False)
 
     # delta learning
-    #learning(x, y, target_d, True)
+    learning(x, y, target_d, init_w, True)
     plt.legend()
     plt.show()
 
 
 # Delta learning with batch vs online
 def task1_2():
-    x, y, target_p, target_d = generate_data()
+    x, y, target_p, target_d, init_w = generate_data()
 
     # delta learning online
-    learning(x, y, target_d, True, False)
+    learning(x, y, target_d, init_w, True, False)
 
     # delta learning batch
-    learning(x, y, target_d, True, True)
+    learning(x, y, target_d, init_w, True, True)
 
     plt.legend()
     plt.show()
@@ -177,13 +181,13 @@ def task1_2():
 
 # Delta batch learning with bias vs without bias
 def task1_3():
-    x, y, target_p, target_d = generate_data()
+    x, y, target_p, target_d, init_w = generate_data()
 
     # Delta learning with batch with bias
-    learning(x, y, target_d, True, True, True)
+    learning(x, y, target_d, init_w, True, True, True)
 
     # Delta learning with batch without bias
-    learning(x, y, target_d, True, True, False)
+    learning(x, y, target_d, init_w, True, True, False)
 
     plt.legend()
     plt.show()
