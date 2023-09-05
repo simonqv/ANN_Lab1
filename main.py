@@ -12,15 +12,15 @@ def generate_data():
     # mean point in distribution, X-axis and Y-axis means.
     # Class A
     meanA = [3.0, 3.0]
-    sigmaA = 0.4
+    sigmaA = 0.2
     x_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[0])).tolist()
     y_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[1])).tolist()
 
     classA = [x_A, y_A]
 
     # Class B
-    meanB = [-2.0, -2.5]
-    sigmaB = 0.4
+    meanB = [10.0, 10.0]
+    sigmaB = 0.2
     x_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[0])).tolist()
     y_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[1])).tolist()
 
@@ -47,8 +47,8 @@ def generate_data():
 
 # 3.1.2.1
 def f_step(X_input, weights):
-    y_prim = weights[0] * X_input[0] + weights[1] * X_input[1] + (-weights[2]) * X_input[2]
-    if y_prim > (-weights[2]): return 1
+    y_prim = (weights[0] * X_input[0]) + (weights[1] * X_input[1]) + (-weights[2] * X_input[2])
+    if y_prim > 0: return 1
     # If on the edge, count as zero
     return 0
 
@@ -57,9 +57,8 @@ def perceptron_learning(X_input, target, weights, eta):
     for i in range(200*2000):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], X_input[2][i % 200]]
         f = f_step(X_in, weights)
-        delta_w = [((-eta) * (target[i % 200] - f)) * X_in[n] for n in range(3)]
+        delta_w = [((eta) * (target[i % 200] - f)) * X_in[n] for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
-
     return weights
 
 
@@ -133,7 +132,7 @@ def learning(x_coord, y_coord, target, delta=True, batch=False, bias=True):
     if bias:
         y_print = x_axis * ((-weights[1]) / weights[0]) + weights[2]
         print("bias ", weights[2])
-        plt.plot(0, weights[2], marker="o", c="pink")
+        plt.plot(0, weights[2], marker="x", c="pink")
     else:
         y_print = x_axis * ((-weights[1]) / weights[0])
         plt.plot(0, 0, marker="o", c="r")
