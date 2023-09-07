@@ -140,10 +140,10 @@ def delta_batch_learning(X_input, target, weights, eta):
    
     ETA = 0.005
     weight_sum = 0
-    for i in range(20):
+    for i in range(50):
         wx = np.dot(weights_np, X_input_np) # (1x3*3*200  -  1x200)*200x3 η(Wx − t)xT
         error = target_np - wx
-        print("SHAPE", np.dot(error, X_input_np.T).shape)
+        #print("SHAPE", np.dot(error/200, X_input_np.T).shape)
         delta_W = ETA * np.dot(error, X_input_np.T)/200 # average error per x/y coordinate value
         print("ERROR", error)
         print(wx)
