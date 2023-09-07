@@ -9,7 +9,9 @@ def generate_data():
     n = 100
     # mean point in distribution, X-axis and Y-axis means.
     # Class A
-    meanA = [2.0, 0.5]
+    #meanA = [2.0, 0.5]
+    #meanA = [2.0, 4.5]
+    meanA = [-5.0, 5.0]
     sigmaA = 0.5
     x_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[0])).tolist()
     y_A = (np.random.permutation(np.random.normal(size=100) * sigmaA + meanA[1])).tolist()
@@ -17,7 +19,8 @@ def generate_data():
     classA = [x_A, y_A]
 
     # Class B
-    meanB = [-2.0, -2.0]
+    #meanB = [10.0, 10.0]
+    meanB = [-4.0, 2.0]
     sigmaB = 0.5
     x_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[0])).tolist()
     y_B = (np.random.permutation(np.random.normal(size=100) * sigmaB + meanB[1])).tolist()
@@ -73,12 +76,12 @@ def perceptron_learning(X_input, target, weights):
 def delta_learning(X_input, target, weights, eta):
     error_per_epoch = []
     square_error = 0
-    eta = 0.001
-    for i in range(200 * 30):
+    ETA = 0.001
+    for i in range(200 * 50):
         X_in = [X_input[0][i % 200], X_input[1][i % 200], 1]
         wx = weights[0] * X_in[0] + weights[1] * X_in[1] + weights[2] * X_in[2]
         error = target[i % 200] - wx
-        delta_w = [eta * error * X_in[n] for n in range(3)]
+        delta_w = [ETA * error * X_in[n] for n in range(3)]
         weights = [weights[n] + delta_w[n] for n in range(3)]
         """
         # plot
@@ -101,35 +104,58 @@ def delta_learning(X_input, target, weights, eta):
 
     return weights, error_per_epoch
 
+def bld2(X_input, target, weights, eta):
+    # Convert input Python arrays to NumPy arrays
+    X_input = np.array(X_input)
+    target = np.array([target])
+    weights = np.array([weights])
+    print(target.shape)
+    # Ensure that the dimensions of X_input and target are as expected
+    assert X_input.shape == (3, 200), "X_input should have dimensions 3x200"
+    assert target.shape == (1, 200), "target should have dimensions 1x200"
+    assert weights.shape == (1, 3), "weights should have dimensions 1x3"
+    eta = 0.001
+    epochs = 1
+    for epoch in range(epochs):
+
+        print
+        # Calculate the predicted values using the current weights
+        predicted = np.dot(weights, X_input)
+        
+        # Calculate the error between predicted and target
+        error = target - predicted
+        
+        # Update the weights using the delta rule in batch mode
+        weights += eta * np.dot(error, X_input.T)
+    
+    return weights.tolist()[0], [0]
 
 # delta learning in batches
 def delta_batch_learning(X_input, target, weights, eta):
     error_per_epoch = []
-
     X_input_np = np.array(X_input)
-    target_np = np.array(target).reshape(1, -1)
-    weights_np = np.array(weights).reshape(1, -1)
+    target_np = np.array(target)#.reshape(1, -1)
+    weights_np = np.array(weights)#.reshape(1, -1)
     X_transposed = np.transpose(X_input_np)
+   
+    ETA = 0.005
+    weight_sum = 0
+    for i in range(20):
+        wx = np.dot(weights_np, X_input_np) # (1x3*3*200  -  1x200)*200x3 η(Wx − t)xT
+        error = target_np - wx
+        print("SHAPE", np.dot(error, X_input_np.T).shape)
+        delta_W = ETA * np.dot(error, X_input_np.T)/200 # average error per x/y coordinate value
+        print("ERROR", error)
+        print(wx)
+        weights_np += delta_W
 
-    # plot
-    x_axis = np.linspace(-4, 4, 100)
-    y_print = x_axis * ((-weights_np[0][1]) / weights_np[0][0]) - weights_np[0][2] / weights_np[0][0]
-    plt.plot(x_axis, y_print, label="before loop", marker="x")
-
-    eta = 0.01
-    for i in range(10):
-        # error = target_np - np.dot(weights_np, X_input_np)
-        error = target_np - weights_np @ X_input_np
-        delta_W = eta * error @ X_transposed
-        # print(list(delta_W))
-        weights_np = weights_np + delta_W
         # calculate mean square error
         mean_square_error = np.mean(np.square(error))
         error_per_epoch.append(mean_square_error)
 
-        y_print = x_axis * ((-weights_np[0][1]) / weights_np[0][0]) - weights_np[0][2] / weights_np[0][0]
+        #y_print = x_axis * ((-weights_np[0][1]) / weights_np[0][0]) - weights_np[0][2] / weights_np[0][0]
 
-        plt.plot(x_axis, y_print, label=f'epoch {i + 1}')
+        #plt.plot(x_axis, y_print, label=f'epoch {i + 1}')
         '''
         if i == 1:
             plt.plot(x_axis, y_print, label="epoch 1")
@@ -147,8 +173,10 @@ def delta_batch_learning(X_input, target, weights, eta):
         if i == 13:
             plt.plot(x_axis, y_print, label="epoch 13")
         '''
+    print(weights_np)
+    #return weights_np[0].tolist(), error_per_epoch
+    return weights_np.tolist(), error_per_epoch
 
-    return weights_np[0].tolist(), error_per_epoch, y_print
 
 
 def learning(x_coord, y_coord, target, init_w, delta=True, batch=False, bias=True):
@@ -180,15 +208,19 @@ def learning(x_coord, y_coord, target, init_w, delta=True, batch=False, bias=Tru
     # y_old = x_axis * ((-weights[1]) / weights[0]) + weights[2]
     if not batch:
         if delta:
+            print("DELTA LEARNIN SEQ")
             weights, error_delta_learning_seq = delta_learning(X_input, target, weights, eta)
             # Uncomment for mean square error plot
             # plt.plot(np.linspace(0, 200, 200), error_delta_learning_seq, label="delta learning sequential eta = 0.001, epochs = 1000")
         else:
+            print("PERCEPTRON LEARNING")
             weights = perceptron_learning(X_input, target, weights)
             # Uncomment for mean sqare error plot
             # plt.plot(np.linspace(0, 200, 200), error_perceptron_learning_seq, label="perception learning sequential eta = 0.001, epochs = 1000")
     else:
-        weights, error_delta_learning_batch, y_print = delta_batch_learning(X_input, target, weights, eta)
+        print("BATCH")
+        weights, error_delta_learning_batch = delta_batch_learning(X_input, target, weights, eta)
+        print("WEIGHTS : ", weights)
         # Uncomment for mean sqare error plot
         # plt.plot(np.linspace(0, 20, 20), error_delta_learning_batch, label="delta learning batch eta = 0.001, epochs = 20")
     return weights
@@ -237,33 +269,35 @@ def delta_learning2(x_coord, y_coord, targets, weights, eta, epochs):
 # Perceptron learning vs Delta learning
 def task1_1():
     x_values, y_values, target_perceptron, target_delta, init_w = generate_data()
-
     weights = init_w  # try with random start also
     bias = np.ones(200).tolist()
     X_input = [x_values, y_values, bias]
     eta = 0.001
     x_decision = np.linspace(min(x_values), max(x_values), 100)
-    # perceptron learning
-    # weights, error_perceptron_learning_seq = perceptron_learning(X_input, target_perceptron, weights, eta)
+    
+    # perceptron learning sequential mode
     weights = learning(x_values, y_values, target_perceptron, init_w, False)
-    # learning(x, y, target_p, init_w, False)
     print("perce", weights)
     y_decision = (-weights[0] * x_decision - weights[2]) / weights[1]
-    plt.plot(x_decision, y_decision, label="Perceptron Learning")
-    # lear
-    # delta learning
+    plt.plot(x_decision, y_decision, label="perceptron learning sequential")
+
+    # delta learning sequential mode
     weights = learning(x_values, y_values, target_delta, init_w, True)
     # final_weights, error = delta_learning2(x_values, y_values, target_delta, init_w, 0.001, 30)
 
     # Plot the decision boundary line using the final weights
     y_decision = (-weights[0] * x_decision - weights[2]) / weights[1]
     print("delta ", weights)
+    plt.plot(x_decision, y_decision, label="delta learning sequential")
+    print("DELTA SEQ WEIGHTS", weights)
+    # delta learning batch mode
+    #weights = learning(x_values, y_values, target_delta, init_w, True)
+    weights = learning(x_values, y_values, target_delta, init_w, True, True, True)
+    y_decision = (-weights[0] * x_decision - weights[2]) / weights[1]
+    plt.plot(x_decision, y_decision, label="delta learning batch", c="r")
 
-    plt.plot(x_decision, y_decision, label="Delta Learning")
-    # plt.xlabel("X Coordinate")
-    # plt.ylabel("Y Coordinate")
     plt.legend()
-    plt.title("Delta Learning Decision Boundary")
+    plt.title("Decision Boundary")
 
     # Show the plot
     plt.show()
@@ -308,4 +342,5 @@ def task2_1():
 
 task1_1()
 # task1_2()
+
 
